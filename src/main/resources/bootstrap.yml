@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: kafka-service
+  cloud:
+    config:
+      discovery:
+        enabled: true
+      failFast: true
+      profile: dev
