@@ -2,8 +2,8 @@ package kafka.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import kafka.abstr.KafkaProducerString;
-import kafka.configprop.RestServerProperties;
-import kafka.json.request.KafkaMessageRequest;
+import kafka.configurationproperties.KafkaConfigProperties;
+import kafka.messge.KafkaMessageString;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,15 +20,15 @@ public class KafkaService {
 
 	private final KafkaProducerString kafkaProducerString;
 	private final RestTemplate restTemplate;
-	private final RestServerProperties servers;
+	private final KafkaConfigProperties servers;
 
-	public void send(KafkaMessageRequest kafkaMessageRequest) {
+	public void send(KafkaMessageString kafkaMessageString) {
 
-		if (!this.servers.getTopics().contains(kafkaMessageRequest.getTopic())) {
-			throw new RuntimeException("Topic not configured: " + kafkaMessageRequest.getTopic());
+		if (!this.servers.getTopics().contains(kafkaMessageString.getTopic())) {
+			throw new RuntimeException("Topic not configured: " + kafkaMessageString.getTopic());
 		}
 		
-		this.kafkaProducerString.send(kafkaMessageRequest.getTopic(), kafkaMessageRequest.getKey(), kafkaMessageRequest.getPayload());
+		this.kafkaProducerString.send(kafkaMessageString.getTopic(), kafkaMessageString.getKey(), kafkaMessageString.getPayload());
 	}
 	
 	public void receive(String topic, String key, JsonNode data) {
@@ -39,7 +39,7 @@ public class KafkaService {
 			throw new RuntimeException("Couldn't find response server for topic: " + topic);
 		}
 
-		KafkaMessageRequest requestBody = KafkaMessageRequest.builder()
+		KafkaMessageString requestBody = KafkaMessageString.builder()
 				.topic(topic)
 				.key(key)
 				.payload(data)

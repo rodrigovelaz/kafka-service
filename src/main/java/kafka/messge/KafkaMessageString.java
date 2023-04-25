@@ -1,4 +1,4 @@
-package kafka.json.request;
+package kafka.messge;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
@@ -8,7 +8,7 @@ import lombok.Data;
 @Builder
 @Data
 @AllArgsConstructor
-public class KafkaMessageRequest {
+public class KafkaMessageString {
 
     private String topic;
     private String key;

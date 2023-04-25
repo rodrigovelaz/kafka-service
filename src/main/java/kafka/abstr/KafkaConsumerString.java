@@ -2,7 +2,7 @@ package kafka.abstr;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kafka.constant.KafkaConstant;
+import kafka.constant.BeansConstant;
 import kafka.constant.PmdConstant;
 import kafka.service.KafkaService;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 @Component
-@KafkaListener(topics = "#{'${kafka.topics}'.split(',')}", containerFactory = KafkaConstant.CONTAINER_FACTORY)
+@KafkaListener(topics = "#{'${kafka.topics}'.split(',')}", containerFactory = BeansConstant.CONTAINER_FACTORY)
 @RequiredArgsConstructor
 @Slf4j
 public class KafkaConsumerString {

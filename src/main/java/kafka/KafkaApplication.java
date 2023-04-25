@@ -1,6 +1,6 @@
 package kafka;
 
-import kafka.configprop.RestServerProperties;
+import kafka.configurationproperties.KafkaConfigProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -12,7 +12,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication
 @ComponentScan
-@EnableConfigurationProperties({KafkaProperties.class, RestServerProperties.class})
+@EnableConfigurationProperties({KafkaProperties.class, KafkaConfigProperties.class})
 @EnableDiscoveryClient
 @EnableSwagger2
 @EntityScan(basePackages = {"org.rodrigovelaz" })
