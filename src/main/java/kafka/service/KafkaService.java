@@ -1,52 +1,53 @@
 package kafka.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import kafka.constant.PmdConstant;
+import com.fasterxml.jackson.databind.JsonNode;
+import kafka.abstr.KafkaProducerString;
+import kafka.configprop.RestServerProperties;
 import kafka.json.request.KafkaMessageRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class KafkaService {
 
-	@Autowired
-	private KafkaTemplate<String, String> kafkaTemplate;
-
-	@Autowired
-//    @Qualifier(KafkaConstant.OBJECT_MAPPER)
-	private ObjectMapper objectMapper;
+	private final KafkaProducerString kafkaProducerString;
+	private final RestTemplate restTemplate;
+	private final RestServerProperties servers;
 
 	public void send(KafkaMessageRequest kafkaMessageRequest) {
 
-		this.send(kafkaMessageRequest.getTopic(), kafkaMessageRequest.getKey(), kafkaMessageRequest.getData());
-
-		/*
-		switch (topic) {
-
-				default:
-					throw new RuntimeException("Invalid topic: " + topic);
-			}
-*/
+		if (!this.servers.getTopics().contains(kafkaMessageRequest.getTopic())) {
+			throw new RuntimeException("Topic not configured: " + kafkaMessageRequest.getTopic());
+		}
+		
+		this.kafkaProducerString.send(kafkaMessageRequest.getTopic(), kafkaMessageRequest.getKey(), kafkaMessageRequest.getPayload());
 	}
+	
+	public void receive(String topic, String key, JsonNode data) {
 
-	@SuppressWarnings(PmdConstant.AVOID_CATCHING_GENERIC_EXCEPTION)
-	protected void send(String topic, String key, Object data) {
-
-		try {
-			String dataString = this.objectMapper.writeValueAsString(data);
-			log.info("Sending KafkaMessage - topic = {}, key = {}, data = {}", topic, key, dataString);
-			this.kafkaTemplate.send(topic, key, dataString);
-		}
-		catch(Exception e) {
-			log.error("Error sending KafkaMessage - topic = " + topic, e);
+		String url = this.servers.getRestServers().get(topic);
+		
+		if (url == null) {
+			throw new RuntimeException("Couldn't find response server for topic: " + topic);
 		}
 
+		KafkaMessageRequest requestBody = KafkaMessageRequest.builder()
+				.topic(topic)
+				.key(key)
+				.payload(data)
+				.build();
+		
+		HttpEntity httpEntity = new HttpEntity(requestBody, null);
+		ParameterizedTypeReference typeRef = new ParameterizedTypeReference<Void>(){};
+		this.restTemplate.exchange(url, HttpMethod.POST, httpEntity, typeRef);
 	}
 
 }
